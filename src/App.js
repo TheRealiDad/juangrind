@@ -1,48 +1,27 @@
 // src/App.js
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Banner from './Banner';  // Import the Banner component
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
-import { Container, Grid, Typography, Link } from '@mui/material';
+import StorePage from './StorePage';  // Import StorePage component
+import { Container } from '@mui/material';
 
 const App = () => {
-  const [isLogin, setIsLogin] = useState(true);
-
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
-  };
-
   return (
-    <>
-      <Banner /> {/* Add the Banner component here */}
+    <Router>
+      <Banner /> {/* Banner component */}
       <Container>
-        <Grid container spacing={4} justifyContent="center" style={{ marginTop: '20px' }}>
-          <Grid item xs={12} sm={6}>
-            {isLogin ? (
-              <>
-                <LoginForm />
-                <Typography variant="body2" align="center" style={{ marginTop: '16px' }}>
-                  Don’t have an account?{' '}
-                  <Link href="#" onClick={toggleForm}>
-                    Sign Up
-                  </Link>
-                </Typography>
-              </>
-            ) : (
-              <>
-                <SignUpForm />
-                <Typography variant="body2" align="center" style={{ marginTop: '16px' }}>
-                  Already have an account?{' '}
-                  <Link href="#" onClick={toggleForm}>
-                    Log In
-                  </Link>
-                </Typography>
-              </>
-            )}
-          </Grid>
-        </Grid>
+        <Routes>
+          {/* LoginForm and SignUpForm Routes */}
+          <Route path="/" element={<LoginForm />} /> {/* Now just pointing to LoginForm */}
+          <Route path="/signup" element={<SignUpForm />} />
+
+          {/* Route for StorePage */}
+          <Route path="/storepage" element={<StorePage />} />
+        </Routes>
       </Container>
-    </>
+    </Router>
   );
 };
 

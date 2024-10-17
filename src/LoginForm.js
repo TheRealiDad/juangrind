@@ -1,19 +1,38 @@
-// src/LoginForm.js
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient';  // Ensure correct import
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();  // Used for navigation
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    // Here you would typically handle the login logic (e.g., call an API)
-    console.log('Email:', email);
-    console.log('Password:', password);
-    
-    // Reset fields after submission
+    setError(null);  // Clear previous error messages
+
+    try {
+      // Updated Supabase login logic for v2
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);  // Display error message
+      } else {
+        console.log('Logged in:', data);
+        // Navigate to storepage after successful login
+        navigate('/storepage');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error(error);
+    }
+
+    // Optionally, reset the fields after submission
     setEmail('');
     setPassword('');
   };
@@ -42,7 +61,10 @@ const LoginForm = () => {
             fullWidth
             margin="normal"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError(null); // Clear error on typing
+            }}
             required
           />
           <TextField
@@ -52,10 +74,13 @@ const LoginForm = () => {
             fullWidth
             margin="normal"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(null); // Clear error on typing
+            }}
             required
           />
-          {error && <Typography color="error">{error}</Typography>}
+          {error && <Typography color="error" style={{ marginTop: '8px' }}>{error}</Typography>}
           <Button 
             type="submit" 
             variant="contained" 

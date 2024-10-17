@@ -1,15 +1,19 @@
 // src/SignUpForm.js
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Box } from '@mui/material';
+import { TextField, Button, Typography, Container, Box, Link } from '@mui/material';
+import { useNavigate, Link as RouterLink } from 'react-router-dom'; // Import Link from react-router-dom
+import { supabase } from './supabaseClient';  // Import Supabase client
 
 const SignUpForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();  // Used for navigation
 
-  const handleSignUp = (event) => {
+  const handleSignUp = async (event) => {
     event.preventDefault();
+    setError(null); // Clear any previous errors
 
     // Basic validation
     if (password !== confirmPassword) {
@@ -17,11 +21,26 @@ const SignUpForm = () => {
       return;
     }
 
-    // Here you would typically handle the signup logic (e.g., call an API)
-    console.log('Sign Up - Email:', email);
-    console.log('Sign Up - Password:', password);
-    
-    // Reset fields after submission
+    try {
+      // Supabase signup logic
+      const { user, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);  // Display error message if signup fails
+      } else {
+        console.log('Signed up:', user);
+        // Navigate to storepage after successful signup
+        navigate('/storepage');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error(error);
+    }
+
+    // Optionally, reset the fields after submission
     setEmail('');
     setPassword('');
     setConfirmPassword('');
@@ -51,7 +70,10 @@ const SignUpForm = () => {
             fullWidth
             margin="normal"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError(null); // Clear error on typing
+            }}
             required
           />
           <TextField
@@ -61,7 +83,10 @@ const SignUpForm = () => {
             fullWidth
             margin="normal"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(null); // Clear error on typing
+            }}
             required
           />
           <TextField
@@ -71,10 +96,13 @@ const SignUpForm = () => {
             fullWidth
             margin="normal"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setError(null); // Clear error on typing
+            }}
             required
           />
-          {error && <Typography color="error">{error}</Typography>}
+          {error && <Typography color="error" style={{ marginTop: '8px' }}>{error}</Typography>}
           <Button 
             type="submit" 
             variant="contained" 
@@ -85,6 +113,13 @@ const SignUpForm = () => {
             Sign Up
           </Button>
         </form>
+        {/* Add Login link */}
+        <Typography variant="body2" align="center" style={{ marginTop: 16 }}>
+          Already have an account?{' '}
+          <Link component={RouterLink} to="/">
+            Log In
+          </Link>
+        </Typography>
       </Box>
     </Container>
   );
