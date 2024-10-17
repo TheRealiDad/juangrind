@@ -14,7 +14,7 @@ const LoginForm = () => {
     setError(null);  // Clear previous error messages
 
     try {
-      // Updated Supabase login logic for v2
+      // Supabase email/password login logic
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,6 +35,30 @@ const LoginForm = () => {
     // Optionally, reset the fields after submission
     setEmail('');
     setPassword('');
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { user, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+
+      if (error) {
+        setError(error.message);  // Display error message if login fails
+      } else {
+        // Wait for the user to complete the Google authentication
+        const { data: { user: userData } } = await supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN') {
+            console.log('Logged in with Google:', userData);
+            // Navigate to storepage after successful login
+            navigate('/storepage');
+          }
+        });
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error(error);
+    }
   };
 
   return (
@@ -91,6 +115,23 @@ const LoginForm = () => {
             Login
           </Button>
         </form>
+        {/* Google Login Button */}
+        <Button 
+          onClick={handleGoogleLogin}
+          variant="outlined"
+          color="primary"
+          fullWidth
+          style={{ marginTop: 16 }}
+        >
+          Login with Google
+        </Button>
+        {/* Sign Up Link */}
+        <Typography variant="body2" style={{ marginTop: '16px' }}>
+          Don't have an account?{' '}
+          <Button color="primary" onClick={() => navigate('/signup')}>
+            Sign Up
+          </Button>
+        </Typography>
       </Box>
     </Container>
   );
