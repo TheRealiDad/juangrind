@@ -15,45 +15,36 @@ const LoginForm = () => {
 
     try {
       // Supabase email/password login logic
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        setError(error.message);  // Display error message
+      if (loginError) {
+        setError(loginError.message);  // Display error message
       } else {
         console.log('Logged in:', data);
-        // Navigate to storepage after successful login
-        navigate('/storepage');
+        navigate('/storepage'); // Navigate to storepage after successful login
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');
       console.error(error);
     }
 
-    // Optionally, reset the fields after submission
+    // Reset the fields after submission
     setEmail('');
     setPassword('');
   };
 
   const handleGoogleLogin = async () => {
+    setError(null); // Clear previous error messages
     try {
-      const { user, error } = await supabase.auth.signInWithOAuth({
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
       });
 
-      if (error) {
-        setError(error.message);  // Display error message if login fails
-      } else {
-        // Wait for the user to complete the Google authentication
-        const { data: { user: userData } } = await supabase.auth.onAuthStateChange((event, session) => {
-          if (event === 'SIGNED_IN') {
-            console.log('Logged in with Google:', userData);
-            // Navigate to storepage after successful login
-            navigate('/storepage');
-          }
-        });
+      if (googleError) {
+        setError(googleError.message);  // Display error message if login fails
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');

@@ -1,44 +1,84 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Ensure these imports
-import Banner from './Banner';  // Import the Banner component
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Container } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Banner from './Banner';
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
-import StorePage from './StorePage';  // Import StorePage component
-import { Container } from '@mui/material';
-import { supabase } from './supabaseClient'; // Import Supabase client
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import WidgetPage from './WidgetPage';
+import HomePage from './HomePage';
+import ProfilePage from './ProfilePage';
+import StorePage from './StorePage';
+import CartPage from './CartPage';
+import HistoryPage from './HistoryPage';
+import ReportsPage from './ReportsPage';
+import { supabase } from './supabaseClient';
+import { useNavigate } from 'react-router-dom';
+
+// Create a custom theme
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#003366', // Navy Blue
+    },
+    secondary: {
+      main: '#B0C4DE', // Light Steel Blue
+    },
+    warning: {
+      main: '#FFD700', // Gold
+    },
+    background: {
+      default: '#FFFFFF', // White
+    },
+  },
+  typography: {
+    // You can customize typography here if needed
+    fontFamily: 'Arial, sans-serif',
+  },
+});
 
 const AuthListener = () => {
-  const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate();
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
-        navigate('/storepage'); // Redirect to storepage on login
+        navigate('/widgetpage');
       }
     });
 
+    // Ensure the subscription is correctly unsubscribed
     return () => {
-      authListener.subscription.unsubscribe(); // Cleanup on unmount
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, [navigate]);
 
-  return null; // This component does not render anything
+  return null;
 };
 
 const App = () => {
   return (
-    <Router>
-      <Banner />
-      <AuthListener /> {/* Add the AuthListener component here */}
-      <Container>
-        <Routes>
-          <Route path="/" element={<LoginForm />} />
-          <Route path="/signup" element={<SignUpForm />} />
-          <Route path="/storepage" element={<StorePage />} />
-        </Routes>
-      </Container>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Banner />
+        <AuthListener />
+        <Container>
+          <Routes>
+            <Route path="/" element={<LoginForm />} />
+            <Route path="/signup" element={<SignUpForm />} />
+            <Route path="/widgetpage" element={<WidgetPage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/store" element={<StorePage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+          </Routes>
+        </Container>
+      </Router>
+    </ThemeProvider>
   );
 };
 
